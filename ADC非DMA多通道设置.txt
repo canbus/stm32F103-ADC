@@ -1,0 +1,79 @@
+1.设置
+  hadc1.Instance = ADC1;
+  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
+  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.DiscontinuousConvMode = ENABLE;
+  hadc1.Init.NbrOfDiscConversion = 1;
+  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.NbrOfConversion = 4;
+
+ /** Configure Regular Channel 
+  */
+  sConfig.Channel = ADC_CHANNEL_0;
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_55CYCLES_5;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Channel = ADC_CHANNEL_1;
+  sConfig.Rank = ADC_REGULAR_RANK_2;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Channel = ADC_CHANNEL_2;
+  sConfig.Rank = ADC_REGULAR_RANK_3;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Channel = ADC_CHANNEL_3;
+  sConfig.Rank = ADC_REGULAR_RANK_4;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+2.AD值获取
+uint16_t ADC_GetValue(void)
+{
+	uint16_t _u16Value;
+	if(HAL_IS_BIT_SET(HAL_ADC_GetState(&hadc1), HAL_ADC_STATE_REG_EOC)) 
+	{		
+		_u16Value = (uint16_t)HAL_ADC_GetValue(&hadc1);			//读取ADC转换数据，数据为12位。查看数据手册可知，寄存器为16位存储转换数据，
+																	//数据右对齐，则转换的数据范围为0~2^12-1,即0~4095.	
+	}
+	return _u16Value;
+}
+void stm32ADC()
+{
+		uint16_t val1,val2,val3,val4;
+		HAL_ADC_Start(&hadc1);  
+		HAL_ADC_PollForConversion(&hadc1,50);//表示等待转换完成，第二个参数表示超时时间，单位ms.    
+		val1 = (float)ADC_GetValue();			//获取ADC1（channel0）的数值
+	  val1 = val1 * 3300 / 4095;
+ 
+		HAL_ADC_Start(&hadc1);  
+		HAL_ADC_PollForConversion(&hadc1,50);   
+		val2 = (float)ADC_GetValue();	
+		val2 = val2 * 3300 / 4095;	
+	
+		HAL_ADC_Start(&hadc1);  
+		HAL_ADC_PollForConversion(&hadc1,50);   
+		val3 = (float)ADC_GetValue();
+		val3 = val3 * 3300 / 4095;
+	
+		HAL_ADC_Start(&hadc1);  
+		HAL_ADC_PollForConversion(&hadc1,50);   
+		val4 = (float)ADC_GetValue();	
+		val4 = val4 * 3300 / 4095;
+		show(val1,val2,val3,val4);
+}
